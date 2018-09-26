@@ -176,6 +176,38 @@ class ConvolutionModel(LanguageModel):
 		answer_pool = maxpool(answer_hl)
 
 		return question_pool, answer_pool
+# 对输入数据进行三维的卷积，
+class MCCNNs(LanguageModel):
+	def build(self):
+		question = self.questions
+		answer = self.get_answer()
+
+		weights = np.load(self.config['initial_embed_weights'])
+		embedding = Embedding(input_dim = self.config['n_words'],
+			                  output_dim = weights.shape[1],
+			                  weights = [weights])
+		question_embedding = embedding(question)
+		answer_embedding = embedding(answer)
+
+		hidden_layer = TimeDistributed(Dense(200,activation = 'tanh'))
+
+		question_hl = hidden_layer(question_embedding)
+		answer_hl = hidden_layer(answer_embedding)
+
+		cnns = [Conv2D(filters = 3, 
+			           kernel_size =(),
+			           activation = 'tanh',
+			           padding = 'same')]
+		#question_cnn = 
+
+		maxpool = Lambda( lambda x: K.max(x,axis = 1,keepdims = False),output_shape = lambda x: (x[0],x[2]))
+		maxpool.supports_masking = True
+
+		question_pool = maxpool(question_cnn)
+		answer_pool = maxpool(answer_cnn)
+
+		return question_pool,answer_pool
+
 # LSTM -> cnn
 class ConvolutionalLSTM(LanguageModel):
 	"""docstring for ConvolutionalLSTM"""
